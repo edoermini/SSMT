@@ -1,0 +1,34 @@
+version: '3'
+services:
+
+    influxdb:
+        image: influxdb
+        volumes:
+            # Mount for influxdb data directory and configuration
+            - influxdbv2:/.influxdbv2
+        ports:
+            - 8086:8086
+
+    # Use the influx cli to set up an influxdb instance. 
+    influxdb_cli:
+        links:
+            - influxdb
+        image: influxdb
+        # Use these same configurations parameters in your telegraf configuration, mytelegraf.conf.
+        entrypoint: influx setup --bucket mybucket -t $VDB-iQXjSNetnY5SQMoJi00hazBDLjzlUmKTbC1iH8wgJcy5RyH9gPn1mFybA3g7Cjlz8R21ryjLUlcn9AaV0Q== -o influx --username=influx --password=influxdb --host=http://influxdb:8086 -f
+            # Wait for the influxd service in the influxdb container has fully bootstrapped before trying to setup an influxdb instance with the influxdb_cli service. 
+        restart: on-failure:10
+        depends_on:
+            - influxdb
+    
+    telegraf:
+        image: telegraf
+        links:
+            - influxdb
+        volumes:
+            # Mount for telegraf config
+            - ./telegraf.conf:/etc/telegraf/telegraf.conf
+        depends_on:
+            - influxdb_cli
+volumes:
+    influxdbv2:
