@@ -15,7 +15,7 @@ services:
             - influxdb
         image: influxdb
         # Use these same configurations parameters in your telegraf configuration, mytelegraf.conf.
-        entrypoint: influx setup --bucket mybucket -t $VDB-iQXjSNetnY5SQMoJi00hazBDLjzlUmKTbC1iH8wgJcy5RyH9gPn1mFybA3g7Cjlz8R21ryjLUlcn9AaV0Q== -o influx --username=influx --password=influxdb --host=http://influxdb:8086 -f
+        entrypoint: influx setup --bucket influx -t $VDB-iQXjSNetnY5SQMoJi00hazBDLjzlUmKTbC1iH8wgJcy5RyH9gPn1mFybA3g7Cjlz8R21ryjLUlcn9AaV0Q== -o influx --username=influx --password=influxdb --host=http://influxdb:8086 -f
             # Wait for the influxd service in the influxdb container has fully bootstrapped before trying to setup an influxdb instance with the influxdb_cli service. 
         restart: on-failure:10
         depends_on:
@@ -23,6 +23,17 @@ services:
     
     telegraf:
         image: telegraf
+        command: bash -c "
+            echo 'deb http://deb.debian.org/debian/ buster main contrib non-free           
+            deb http://deb.debian.org/debian/ buster-updates main contrib non-free
+            deb http://security.debian.org/debian-security buster/updates main contrib non-free' > /etc/apt/sources.list &&
+            apt-get update &&
+            apt-get install snmp snmpd -y &&
+            apt-get install snmp-mibs-downloader -y &&
+            service snmpd start &&
+            telegraf"
+        environment: 
+            - MIBS=ALL
         links:
             - influxdb
         volumes:
@@ -30,5 +41,6 @@ services:
             - ./telegraf.conf:/etc/telegraf/telegraf.conf
         depends_on:
             - influxdb_cli
+
 volumes:
     influxdbv2:
