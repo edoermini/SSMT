@@ -33,7 +33,12 @@
      ]
     },
     "variable": {
-     "data": []
+     "data": [
+      {
+       "type": "variable",
+       "id": "076e69dbcdc58000"
+      }
+     ]
     }
    }
   },
@@ -63,7 +68,7 @@
      "x": 6,
      "y": 0,
      "w": 6,
-     "h": 6
+     "h": 4
     },
     "relationships": {
      "view": {
@@ -81,7 +86,7 @@
      "x": 0,
      "y": 1,
      "w": 6,
-     "h": 5
+     "h": 3
     },
     "relationships": {
      "view": {
@@ -262,7 +267,7 @@
       "shape": "chronograf-v2",
       "queries": [
        {
-        "text": "from(bucket: \"snmp\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"interface\")\n  |> filter(fn: (r) => r[\"_field\"] == \"ifInOctets\" or r[\"_field\"] == \"ifOutOctets\")\n  |> filter(fn: (r) => r[\"ifIndex\"] == \"3\")\n  |> drop(columns: [\"_start\", \"_stop\"])\n  |> aggregateWindow(every: v.windowPeriod, fn: last)\n  |> sort(columns: [\"_time\"], desc: false)\n  |> derivative(unit: 1s, nonNegative: true, columns: [\"_value\"], timeColumn: \"_time\")\n  |> map(fn: (r) => ({ r with _value: r._value }))\n  |> drop(fn: (column) => not(column =~ /_time*|_value*|_field*/))\n",
+        "text": "from(bucket: \"snmp\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"interface\")\n  |> filter(fn: (r) => r[\"_field\"] == \"ifInOctets\" or r[\"_field\"] == \"ifOutOctets\")\n  |> filter(fn: (r) => r[\"ifDescr\"] == v.snmp_interfaces)\n  |> drop(columns: [\"_start\", \"_stop\"])\n  |> aggregateWindow(every: v.windowPeriod, fn: last)\n  |> sort(columns: [\"_time\"], desc: false)\n  |> derivative(unit: 1s, nonNegative: true, columns: [\"_value\"], timeColumn: \"_time\")\n  |> map(fn: (r) => ({ r with _value: r._value }))\n  |> drop(fn: (column) => not(column =~ /_time*|_value*|_field*/))\n",
         "editMode": "advanced",
         "name": "",
         "builderConfig": {
@@ -355,6 +360,26 @@
       "legendColorizeRows": false,
       "legendOpacity": 0,
       "legendOrientationThreshold": 0
+     }
+    }
+   },
+   {
+    "id": "076e69dbcdc58000",
+    "type": "variable",
+    "attributes": {
+     "name": "snmp_interfaces",
+     "arguments": {
+      "type": "query",
+      "values": {
+       "query": "import \"influxdata/influxdb/schema\"\n\nschema.tagValues(bucket: \"snmp\", tag: \"ifDescr\")",
+       "language": "flux"
+      }
+     },
+     "selected": []
+    },
+    "relationships": {
+     "label": {
+      "data": []
      }
     }
    }
