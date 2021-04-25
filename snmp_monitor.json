@@ -29,6 +29,10 @@
       {
        "type": "cell",
        "id": "076e5333c6b4b000"
+      },
+      {
+       "type": "cell",
+       "id": "076e6dd3d034b000"
       }
      ]
     },
@@ -93,6 +97,24 @@
       "data": {
        "type": "view",
        "id": "076e5333c6b4b000"
+      }
+     }
+    }
+   },
+   {
+    "id": "076e6dd3d034b000",
+    "type": "cell",
+    "attributes": {
+     "x": 0,
+     "y": 4,
+     "w": 12,
+     "h": 4
+    },
+    "relationships": {
+     "view": {
+      "data": {
+       "type": "view",
+       "id": "076e6dd3d034b000"
       }
      }
     }
@@ -268,6 +290,111 @@
       "queries": [
        {
         "text": "from(bucket: \"snmp\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"interface\")\n  |> filter(fn: (r) => r[\"_field\"] == \"ifInOctets\" or r[\"_field\"] == \"ifOutOctets\")\n  |> filter(fn: (r) => r[\"ifDescr\"] == v.snmp_interfaces)\n  |> drop(columns: [\"_start\", \"_stop\"])\n  |> aggregateWindow(every: v.windowPeriod, fn: last)\n  |> sort(columns: [\"_time\"], desc: false)\n  |> derivative(unit: 1s, nonNegative: true, columns: [\"_value\"], timeColumn: \"_time\")\n  |> map(fn: (r) => ({ r with _value: r._value }))\n  |> drop(fn: (column) => not(column =~ /_time*|_value*|_field*/))\n",
+        "editMode": "advanced",
+        "name": "",
+        "builderConfig": {
+         "buckets": [],
+         "tags": [
+          {
+           "key": "_measurement",
+           "values": [],
+           "aggregateFunctionType": "filter"
+          }
+         ],
+         "functions": [
+          {
+           "name": "mean"
+          }
+         ],
+         "aggregateWindow": {
+          "period": "auto",
+          "fillValues": false
+         }
+        }
+       }
+      ],
+      "axes": {
+       "x": {
+        "bounds": [
+         "",
+         ""
+        ],
+        "label": "",
+        "prefix": "",
+        "suffix": "",
+        "base": "10",
+        "scale": "linear"
+       },
+       "y": {
+        "bounds": [
+         "",
+         ""
+        ],
+        "label": "",
+        "prefix": "",
+        "suffix": "",
+        "base": "10",
+        "scale": "linear"
+       }
+      },
+      "type": "xy",
+      "legend": {},
+      "geom": "line",
+      "colors": [
+       {
+        "id": "d1d1b0fc-2bde-4d8d-ac77-640b79e68754",
+        "type": "scale",
+        "hex": "#31C0F6",
+        "name": "Nineteen Eighty Four",
+        "value": 0
+       },
+       {
+        "id": "eb33de63-1c52-4fb6-b86c-52bbec929c30",
+        "type": "scale",
+        "hex": "#A500A5",
+        "name": "Nineteen Eighty Four",
+        "value": 0
+       },
+       {
+        "id": "cc1dbd27-c920-4e91-9291-cf14a57e916a",
+        "type": "scale",
+        "hex": "#FF7E27",
+        "name": "Nineteen Eighty Four",
+        "value": 0
+       }
+      ],
+      "note": "",
+      "showNoteWhenEmpty": false,
+      "xColumn": "_time",
+      "generateXAxisTicks": null,
+      "xTotalTicks": 0,
+      "xTickStart": 0,
+      "xTickStep": 0,
+      "yColumn": "_value",
+      "generateYAxisTicks": null,
+      "yTotalTicks": 0,
+      "yTickStart": 0,
+      "yTickStep": 0,
+      "shadeBelow": false,
+      "position": "overlaid",
+      "timeFormat": "",
+      "hoverDimension": "",
+      "legendColorizeRows": false,
+      "legendOpacity": 0,
+      "legendOrientationThreshold": 0
+     }
+    }
+   },
+   {
+    "type": "view",
+    "id": "076e6dd3d034b000",
+    "attributes": {
+     "name": "CPU usage (%)",
+     "properties": {
+      "shape": "chronograf-v2",
+      "queries": [
+       {
+        "text": "from(bucket: \"snmp\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"snmp\")\n  |> filter(fn: (r) => r[\"_field\"] == \"ssCpuUser\" or r[\"_field\"] == \"ssCpuSystem\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> drop(fn: (column) => (not(column =~ /_time*|_value*|_field/)))",
         "editMode": "advanced",
         "name": "",
         "builderConfig": {
