@@ -1,0 +1,364 @@
+{
+ "meta": {
+  "version": "1",
+  "type": "dashboard",
+  "name": "SNMP monitor-Template",
+  "description": "template created from dashboard: SNMP monitor"
+ },
+ "content": {
+  "data": {
+   "type": "dashboard",
+   "attributes": {
+    "name": "SNMP monitor",
+    "description": ""
+   },
+   "relationships": {
+    "label": {
+     "data": []
+    },
+    "cell": {
+     "data": [
+      {
+       "type": "cell",
+       "id": "076e409142f4b000"
+      },
+      {
+       "type": "cell",
+       "id": "076e4a8cddf4b000"
+      },
+      {
+       "type": "cell",
+       "id": "076e5333c6b4b000"
+      }
+     ]
+    },
+    "variable": {
+     "data": []
+    }
+   }
+  },
+  "included": [
+   {
+    "id": "076e409142f4b000",
+    "type": "cell",
+    "attributes": {
+     "x": 0,
+     "y": 0,
+     "w": 6,
+     "h": 1
+    },
+    "relationships": {
+     "view": {
+      "data": {
+       "type": "view",
+       "id": "076e409142f4b000"
+      }
+     }
+    }
+   },
+   {
+    "id": "076e4a8cddf4b000",
+    "type": "cell",
+    "attributes": {
+     "x": 6,
+     "y": 0,
+     "w": 6,
+     "h": 6
+    },
+    "relationships": {
+     "view": {
+      "data": {
+       "type": "view",
+       "id": "076e4a8cddf4b000"
+      }
+     }
+    }
+   },
+   {
+    "id": "076e5333c6b4b000",
+    "type": "cell",
+    "attributes": {
+     "x": 0,
+     "y": 1,
+     "w": 6,
+     "h": 5
+    },
+    "relationships": {
+     "view": {
+      "data": {
+       "type": "view",
+       "id": "076e5333c6b4b000"
+      }
+     }
+    }
+   },
+   {
+    "type": "view",
+    "id": "076e409142f4b000",
+    "attributes": {
+     "name": "System uptime",
+     "properties": {
+      "shape": "chronograf-v2",
+      "type": "single-stat",
+      "queries": [
+       {
+        "text": "import \"math\"\n\nfrom(bucket: \"snmp\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"snmp\")\n  |> filter(fn: (r) => r[\"_field\"] == \"uptime\")\n  |> map(fn: (r) => ({ r with _value: \n      string(v: math.round(x: float(v: r._value) / 86400.0 / 100.0 )) + \"d \" +\n      string(v: math.round(x: ((float(v: r._value) / 100.0) % 86400.0) / 3600.0 )) + \"h \" +\n      string(v: math.round(x: ((float(v: r._value) / 100.0) % 3600.0 ) / 60.0)) + \"m \" +\n      string(v: math.round(x: ((float(v: r._value) / 100.0) % 60.0))) + \"s \"\n    }))",
+        "editMode": "advanced",
+        "name": "",
+        "builderConfig": {
+         "buckets": [],
+         "tags": [
+          {
+           "key": "_measurement",
+           "values": [],
+           "aggregateFunctionType": "filter"
+          }
+         ],
+         "functions": [
+          {
+           "name": "mean"
+          }
+         ],
+         "aggregateWindow": {
+          "period": "auto",
+          "fillValues": false
+         }
+        }
+       }
+      ],
+      "prefix": "",
+      "tickPrefix": "",
+      "suffix": "",
+      "tickSuffix": "",
+      "colors": [
+       {
+        "id": "base",
+        "type": "text",
+        "hex": "#00C9FF",
+        "name": "laser",
+        "value": 0
+       }
+      ],
+      "decimalPlaces": {
+       "isEnforced": true,
+       "digits": 2
+      },
+      "note": "",
+      "showNoteWhenEmpty": false
+     }
+    }
+   },
+   {
+    "type": "view",
+    "id": "076e4a8cddf4b000",
+    "attributes": {
+     "name": "Used memory (GB)",
+     "properties": {
+      "shape": "chronograf-v2",
+      "queries": [
+       {
+        "text": "memAvailReal = from(bucket: \"snmp\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_field\"] == \"memAvailReal\")\n  |> drop(columns: [\"_start\", \"_stop\"])\n\nmemTotalReal = from(bucket: \"snmp\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_field\"] == \"memTotalReal\")\n  |> drop(columns: [\"_start\", \"_stop\"])\n\njoin(tables:{key1: memAvailReal, key2: memTotalReal}, on: [\"_time\"], method: \"inner\")\n                  |> map(fn: (r) => ({\n                    _time: r._time,\n                    _value: (float(v: r._value_key2) - float(v: r._value_key1)) / 1024.0 / 1024.0,\n                    _field: \"Memory Usage GB\"\n                  }))\n                  |> yield(name:\"GB\")",
+        "editMode": "advanced",
+        "name": "",
+        "builderConfig": {
+         "buckets": [],
+         "tags": [
+          {
+           "key": "_measurement",
+           "values": [],
+           "aggregateFunctionType": "filter"
+          }
+         ],
+         "functions": [
+          {
+           "name": "mean"
+          }
+         ],
+         "aggregateWindow": {
+          "period": "auto",
+          "fillValues": false
+         }
+        }
+       }
+      ],
+      "axes": {
+       "x": {
+        "bounds": [
+         "",
+         ""
+        ],
+        "label": "",
+        "prefix": "",
+        "suffix": "",
+        "base": "10",
+        "scale": "linear"
+       },
+       "y": {
+        "bounds": [
+         "",
+         ""
+        ],
+        "label": "",
+        "prefix": "",
+        "suffix": "",
+        "base": "10",
+        "scale": "linear"
+       }
+      },
+      "type": "xy",
+      "legend": {},
+      "geom": "line",
+      "colors": [
+       {
+        "id": "d1d1b0fc-2bde-4d8d-ac77-640b79e68754",
+        "type": "scale",
+        "hex": "#31C0F6",
+        "name": "Nineteen Eighty Four",
+        "value": 0
+       },
+       {
+        "id": "eb33de63-1c52-4fb6-b86c-52bbec929c30",
+        "type": "scale",
+        "hex": "#A500A5",
+        "name": "Nineteen Eighty Four",
+        "value": 0
+       },
+       {
+        "id": "cc1dbd27-c920-4e91-9291-cf14a57e916a",
+        "type": "scale",
+        "hex": "#FF7E27",
+        "name": "Nineteen Eighty Four",
+        "value": 0
+       }
+      ],
+      "note": "",
+      "showNoteWhenEmpty": false,
+      "xColumn": "_time",
+      "generateXAxisTicks": null,
+      "xTotalTicks": 0,
+      "xTickStart": 0,
+      "xTickStep": 0,
+      "yColumn": "_value",
+      "generateYAxisTicks": null,
+      "yTotalTicks": 0,
+      "yTickStart": 0,
+      "yTickStep": 0,
+      "shadeBelow": false,
+      "position": "overlaid",
+      "timeFormat": "",
+      "hoverDimension": "",
+      "legendColorizeRows": false,
+      "legendOpacity": 0,
+      "legendOrientationThreshold": 0
+     }
+    }
+   },
+   {
+    "type": "view",
+    "id": "076e5333c6b4b000",
+    "attributes": {
+     "name": "Network traffic (bytes/s)",
+     "properties": {
+      "shape": "chronograf-v2",
+      "queries": [
+       {
+        "text": "from(bucket: \"snmp\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"interface\")\n  |> filter(fn: (r) => r[\"_field\"] == \"ifInOctets\" or r[\"_field\"] == \"ifOutOctets\")\n  |> filter(fn: (r) => r[\"ifIndex\"] == \"3\")\n  |> drop(columns: [\"_start\", \"_stop\"])\n  |> aggregateWindow(every: v.windowPeriod, fn: last)\n  |> sort(columns: [\"_time\"], desc: false)\n  |> derivative(unit: 1s, nonNegative: true, columns: [\"_value\"], timeColumn: \"_time\")\n  |> map(fn: (r) => ({ r with _value: r._value }))\n  |> drop(fn: (column) => not(column =~ /_time*|_value*|_field*/))\n",
+        "editMode": "advanced",
+        "name": "",
+        "builderConfig": {
+         "buckets": [],
+         "tags": [
+          {
+           "key": "_measurement",
+           "values": [],
+           "aggregateFunctionType": "filter"
+          }
+         ],
+         "functions": [
+          {
+           "name": "mean"
+          }
+         ],
+         "aggregateWindow": {
+          "period": "auto",
+          "fillValues": false
+         }
+        }
+       }
+      ],
+      "axes": {
+       "x": {
+        "bounds": [
+         "",
+         ""
+        ],
+        "label": "",
+        "prefix": "",
+        "suffix": "",
+        "base": "10",
+        "scale": "linear"
+       },
+       "y": {
+        "bounds": [
+         "",
+         ""
+        ],
+        "label": "",
+        "prefix": "",
+        "suffix": "",
+        "base": "10",
+        "scale": "linear"
+       }
+      },
+      "type": "xy",
+      "legend": {},
+      "geom": "line",
+      "colors": [
+       {
+        "id": "d1d1b0fc-2bde-4d8d-ac77-640b79e68754",
+        "type": "scale",
+        "hex": "#31C0F6",
+        "name": "Nineteen Eighty Four",
+        "value": 0
+       },
+       {
+        "id": "eb33de63-1c52-4fb6-b86c-52bbec929c30",
+        "type": "scale",
+        "hex": "#A500A5",
+        "name": "Nineteen Eighty Four",
+        "value": 0
+       },
+       {
+        "id": "cc1dbd27-c920-4e91-9291-cf14a57e916a",
+        "type": "scale",
+        "hex": "#FF7E27",
+        "name": "Nineteen Eighty Four",
+        "value": 0
+       }
+      ],
+      "note": "",
+      "showNoteWhenEmpty": false,
+      "xColumn": "_time",
+      "generateXAxisTicks": null,
+      "xTotalTicks": 0,
+      "xTickStart": 0,
+      "xTickStep": 0,
+      "yColumn": "_value",
+      "generateYAxisTicks": null,
+      "yTotalTicks": 0,
+      "yTickStart": 0,
+      "yTickStep": 0,
+      "shadeBelow": false,
+      "position": "overlaid",
+      "timeFormat": "",
+      "hoverDimension": "",
+      "legendColorizeRows": false,
+      "legendOpacity": 0,
+      "legendOrientationThreshold": 0
+     }
+    }
+   }
+  ]
+ },
+ "labels": []
+}
