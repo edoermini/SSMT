@@ -26,6 +26,8 @@ services:
         image: telegraf
         links:
             - influxdb
+        volumes: 
+            - ./telegraf.conf:/etc/telegraf/telegraf.conf
         environment: 
             - INFLUX_HOST=$INFLUX_HOST
             - INFLUX_TOKEN=$INFLUX_TOKEN
